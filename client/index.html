@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Percolation method</title>
+    <link rel="stylesheet/less" type="text/css" href="styles.less" />
+</head>
+<body>
+<div class="percolation-method">
+    <table class="percolation-method__table" id="percolation-table"></table>
+    <div class="percolation-method__form-wrapper">
+        <div class="percolation-method__form-inputs">
+            <label for="size-input">Size</label>
+            <input type="number" id="size-input" class="percolation-method__form-size-input">
+            <br>
+            <label for="concentration-input">Concentration</label>
+            <input type="number" id="concentration-input" class="percolation-method__form-concentration-input">
+        </div>
+        <button class="percolation-method__form-generate-btn" onclick="onButtonClick()">Generate</button>
+    </div>
+</div>
+<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/less" ></script>
+</body>
+</html>
