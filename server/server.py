@@ -1,8 +1,16 @@
+import os
 import random
-from flask import Flask
+from flask import Flask, render_template
 
-app = Flask(__name__)
+project_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+client_dir = os.path.join(project_dir, 'client')
+static_dir = os.path.join(client_dir, 'static')
+template_dir = os.path.join(client_dir, 'templates')
+app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 
+@app.route("/")
+def hello():
+    return render_template('index.html')
 
 @app.route("/generateMatrix/<int:size>/<int:concentration>", methods=['GET'])
 def generate_matrix(concentration, size):
