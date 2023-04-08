@@ -3,21 +3,27 @@ const serverUrl = 'http://127.0.0.1:4567'
 function fetchData(size, concentration) {
     return fetch(serverUrl + `/generateMatrix/${size}/${concentration}`)
         .then((res) => res.json())
-        .then((data) => data);
+        .then((data) => {
+            return data;
+        });
 }
 
 function validateData(data) {
     let result = Array.isArray(data);
-    if(result) return isSquareMatrix(data);
-    else return false;
+    if (result) {
+        return isSquareMatrix(data)
+    } else {
+        return false;
+    }
 }
 
 function isSquareMatrix(matrix) {
-    for (var i = 0; i < matrix.length; i++) {
-        rows = matrix.length;
-        columns = matrix[i].length;
-        if(rows != columns) {
-          return false;
+    let rows = matrix.length;
+
+    for (let i = 0; i < matrix.length; i++) {
+        let columns = matrix[i].length;
+        if (rows !== columns) {
+            return false;
         }
     }
     return true;
@@ -37,7 +43,7 @@ function generateTable(data) {
     containerElem.insertBefore(percolationTable, containerElem.firstChild);
 }
 
-function showMessageInsideTable(message){
+function showMessageInsideTable(message) {
     let percolationTable = document.getElementById('percolation-table');
     percolationTable.innerHTML = "";
     let tableRow = percolationTable.insertRow(0);
@@ -52,8 +58,9 @@ async function main() {
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
         showMessageInsideTable(message);
+    } else {
+        generateTable(data);
     }
-    else generateTable(data);
 }
 
 async function onButtonClick() {
@@ -64,8 +71,9 @@ async function onButtonClick() {
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
         showMessageInsideTable(message);
+    } else {
+        generateTable(data);
     }
-    else generateTable(data);
 }
 
 (() => {
