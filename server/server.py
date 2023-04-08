@@ -15,8 +15,8 @@ def hello():
     return render_template('index.html')
 
 @app.route("/generateMatrix/<int:size>/<int:concentration>", methods=['GET'])
-def genetation_matrix(concentration, size):
-    return [[int(random.uniform(0, 1) <= concentration) for i in range(size)] for j in range(size)]
+def generation_matrix(concentration, size):
+    return [[int(random.uniform(0, 1) <= concentration * 0.01) for i in range(size)] for j in range(size)]
 
 
 def createCluster(countClusters, i, j):
