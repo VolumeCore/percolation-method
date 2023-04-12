@@ -10,9 +10,11 @@ static_dir = os.path.join(client_dir, 'static')
 template_dir = os.path.join(client_dir, 'templates')
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 
+
 @app.route("/")
 def hello():
     return render_template('index.html')
+
 
 @app.route("/generateMatrix/<int:size>/<int:concentration>", methods=['GET'])
 def generation_matrix(concentration, size):
@@ -106,18 +108,42 @@ def crossTest():
     print(np.matrix(HK))
 
 
+def dijkstra(N, S, matrix):
+    #print(matrix)
+    for row in matrix:
+        print(row)
+    valid = [True] * N
+    weight = [1000000] * N
+    weight[S] = 0
+    for i in range(N):
+        min_weight = 1000001
+        ID_min_weight = -1
+        for j in range(N):
+            if valid[j] and weight[j] < min_weight:
+                min_weight = weight[j]
+                ID_min_weight = j
+        for z in range(N):
+            if weight[ID_min_weight] + matrix[ID_min_weight][z] < weight[z]:
+                weight[z] = weight[ID_min_weight] + matrix[ID_min_weight][z]
+        valid[ID_min_weight] = False
+    print('result:')
+    return weight
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=4567)
+    mat = generation_matrix(50, 5)
+    print('dijkstra:')
+    print(dijkstra(5, 0, mat))
+    # app.run(host='0.0.0.0', port=4567)
 
-    concentration = 0.45
-    size = 10
-    clustersVolume = {}
+    # concentration = 45
+    # size = 10
+    # clustersVolume = {}
 
-    clustersVolume.clear()
-    A = generation_matrix(concentration, size)
-    HK = hoshenKopelman(A)
-    print(np.matrix(HK))
+    # clustersVolume.clear()
+    # A = generation_matrix(concentration, size)
+    # HK = hoshenKopelman(A)
+    # print(np.matrix(HK))
 
     # тест на кресте (работает)
-    #crossTest()
-
+    # crossTest()
