@@ -114,7 +114,7 @@ if __name__ == "__main__":
     clustersVolume = {}
 
     clustersVolume.clear()
-    A = genetation_matrix(concentration, size)
+    A = generation_matrix(concentration, size)
     HK = hoshenKopelman(A)
     print(np.matrix(HK))
 
