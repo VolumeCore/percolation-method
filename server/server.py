@@ -107,33 +107,37 @@ def crossTest():
     HK = hoshenKopelman(A)
     print(np.matrix(HK))
 
+def dijkstra(graph, start):
+    distances = [float("inf") for _ in range(len(graph))]
+    visited = [False for _ in range(len(graph))]
+    distances[start] = 0
 
-def dijkstra(N, S, matrix):
-    #print(matrix)
-    for row in matrix:
-        print(row)
-    valid = [True] * N
-    weight = [1000000] * N
-    weight[S] = 0
-    for i in range(N):
-        min_weight = 1000001
-        ID_min_weight = -1
-        for j in range(N):
-            if valid[j] and weight[j] < min_weight:
-                min_weight = weight[j]
-                ID_min_weight = j
-        for z in range(N):
-            if weight[ID_min_weight] + matrix[ID_min_weight][z] < weight[z]:
-                weight[z] = weight[ID_min_weight] + matrix[ID_min_weight][z]
-        valid[ID_min_weight] = False
-    print('result:')
-    return weight
+    while not all(visited):
+        shortest_distance = float("inf")
+        shortest_index = -1
+        for i in range(len(graph)):
+            if distances[i] < shortest_distance and not visited[i]:
+                shortest_distance = distances[i]
+                shortest_index = i
+
+        for i in range(len(graph[shortest_index])):
+            if graph[shortest_index][i] != 0 and distances[i] > distances[shortest_index] + graph[shortest_index][i]:
+                distances[i] = distances[shortest_index] + graph[shortest_index][i]
+
+        visited[shortest_index] = True
+    print("Lowest distances: " + str(distances))
 
 
 if __name__ == "__main__":
-    mat = generation_matrix(50, 5)
+    mat = [
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [1, 1, 0, 0, 1],
+        [0, 0, 0, 1, 1],
+        [1, 0, 0, 1, 1]
+    ]
     print('dijkstra:')
-    print(dijkstra(5, 0, mat))
+    dijkstra(mat, 0)
     # app.run(host='0.0.0.0', port=4567)
 
     # concentration = 45
