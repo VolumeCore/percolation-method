@@ -1,5 +1,9 @@
+from time import sleep
+
 import numpy as np
 from itertools import product
+
+from flask_socketio import emit
 from matrix import Matrix
 
 
@@ -49,16 +53,17 @@ class HoshenKopelman:
                 for x, y in self.clustersVolume[left]:
                     matrix[x][y] = matrix[i][j]
 
-            print(np.matrix(matrix))
-            print(self.clustersVolume)
+            print(matrix)
+            emit('hoshen_kopelman', {'matrix': matrix})
+
         return matrix
 
     def random_matrix(self):
-        self.__method(Matrix(self.concentration, self.size).generation_matrix())
+        return self.__method(Matrix(self.concentration, self.size).generation_matrix())
 
     def cross_test(self):
-        self.__method(Matrix(self.concentration, self.size).cross_matrix())
+        return self.__method(Matrix(self.concentration, self.size).cross_matrix())
 
 
 if __name__ == "__main__":
-    print(HoshenKopelman(80, 13).cross_test())
+    print(np.matrix(HoshenKopelman(80, 13).cross_test()))

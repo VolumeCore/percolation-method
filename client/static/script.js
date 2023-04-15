@@ -2,8 +2,13 @@ const serverUrl = 'http://127.0.0.1:4567'
 
 socket = io.connect('http://' + document.domain + ':' + location.port + '/app');
 
-socket.on('connect', function() {
-    socket.emit('connect', {});
+socket.on('hoshen_kopelman', function(data) {
+    if (!data) {
+        let message = 'Incorrect data came from the server. Try again';
+        showMessageInsideTable(message);
+    } else {
+        generateTable(data.matrix);
+    }
 });
 
 function fetchData(size, concentration) {
@@ -36,13 +41,20 @@ function isSquareMatrix(matrix) {
 }
 
 function generateTable(data) {
+    console.log(data)
     let percolationTable = document.getElementById('percolation-table');
     percolationTable.innerHTML = "";
     for (let row of data) {
         let tableRow = percolationTable.insertRow();
         for (let col of row) {
             let cell = tableRow.insertCell();
-            !!col && cell.classList.add('_blue');
+            if(!!col){
+                if(col === 1){
+                    cell.classList.add('_blue')
+                }
+                cell.style.backgroundColor = '#' + (col*9856)
+            }
+
         }
     }
     let containerElem = document.querySelector('.percolation-method');
@@ -80,6 +92,13 @@ async function onButtonClick() {
     } else {
         generateTable(data);
     }
+}
+
+async function onButtonHoshenKopelmanClick() {
+    const size = document.getElementById('size-input').value;
+    const concentration = document.getElementById('concentration-input').value;
+    console.log(size, concentration)
+    socket.emit('hoshen_kopelman', {concentration: concentration, size: size});
 }
 
 (() => {

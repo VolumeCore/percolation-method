@@ -3,6 +3,7 @@ import os
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from matrix import Matrix
+from hoshenKopelman import HoshenKopelman
 
 project_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 client_dir = os.path.join(project_dir, 'client')
@@ -29,8 +30,13 @@ def test_disconnect():
 
 @app.route("/generateMatrix/<int:size>/<int:concentration>", methods=['GET'])
 def generation_matrix(concentration, size):
-    print(Matrix(concentration, size).generation_matrix())
     return Matrix(concentration, size).generation_matrix()
+
+
+@socketio.on('hoshen_kopelman', namespace='/app')
+def hoshen_kopelman(message):
+    print("Start Hoshen Kopelman")
+    HoshenKopelman(int(message['concentration']), int(message['size'])).random_matrix()
 
 
 if __name__ == "__main__":
