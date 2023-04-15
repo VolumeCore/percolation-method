@@ -1,5 +1,11 @@
 const serverUrl = 'http://127.0.0.1:4567'
 
+socket = io.connect('http://' + document.domain + ':' + location.port + '/app');
+
+socket.on('connect', function() {
+    socket.emit('connect', {});
+});
+
 function fetchData(size, concentration) {
     return fetch(serverUrl + `/generateMatrix/${size}/${concentration}`)
         .then((res) => res.json())
