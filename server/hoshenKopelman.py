@@ -53,7 +53,7 @@ class HoshenKopelman:
                 for x, y in self.clustersVolume[left]:
                     matrix[x][y] = matrix[i][j]
 
-            print(matrix)
+            # print(matrix)
             emit('hoshen_kopelman', {'matrix': matrix})
 
         return matrix

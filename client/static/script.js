@@ -41,7 +41,6 @@ function isSquareMatrix(matrix) {
 }
 
 function generateTable(data) {
-    console.log(data)
     let percolationTable = document.getElementById('percolation-table');
     percolationTable.innerHTML = "";
     for (let row of data) {
@@ -97,7 +96,6 @@ async function onButtonClick() {
 async function onButtonHoshenKopelmanClick() {
     const size = document.getElementById('size-input').value;
     const concentration = document.getElementById('concentration-input').value;
-    console.log(size, concentration)
     socket.emit('hoshen_kopelman', {concentration: concentration, size: size});
 }
 
