@@ -1,4 +1,9 @@
 const serverUrl = 'http://127.0.0.1:4567'
+let currentMatrix;
+let selected1 = {};
+let selected2 = {};
+let dijkstraBtn = document.getElementById('dijkstra-btn');
+let infoText = document.getElementById('info-text');
 
 function fetchData(size, concentration) {
     return fetch(serverUrl + `/generateMatrix/${size}/${concentration}`)
@@ -30,17 +35,92 @@ function isSquareMatrix(matrix) {
 }
 
 function generateTable(data) {
+    infoText.innerHTML = "";
     let percolationTable = document.getElementById('percolation-table');
     percolationTable.innerHTML = "";
-    for (let row of data) {
+    dijkstraBtn.setAttribute('disabled', 'true');
+    for (let i = 0; i < data.length; i++) {
         let tableRow = percolationTable.insertRow();
-        for (let col of row) {
+        for (let j = 0; j < data[i].length; j++) {
             let cell = tableRow.insertCell();
-            !!col && cell.classList.add('_blue');
+            if (!!data[i][j]) {
+                cell.classList.add('_blue');
+
+                if (i === 0 || i === data.length - 1) {
+                    cell.classList.add('_clickable');
+                    cell.addEventListener('click', () => {
+                        if (cell.classList.contains('_selected')) {
+                            cell.classList.remove('_selected');
+                            if (i === 0) {
+                                selected1 = {};
+                            }
+                            if (i === data.length - 1) {
+                                selected2 = {};
+                            }
+                            dijkstraBtn.setAttribute('disabled', 'true');
+                            return;
+                        }
+                        if (i === 0) {
+                            selected1 = {x: i, y: j};
+                            for (let cell of percolationTable.firstChild.firstChild.childNodes) {
+                                cell.classList.remove('_selected')
+                            }
+                        } else {
+                            selected2 = {x: i, y: j};
+                            for (let cell of percolationTable.firstChild.lastChild.childNodes) {
+                                cell.classList.remove('_selected')
+                            }
+                        }
+                        cell.classList.add('_selected');
+
+                        if (!!Object.keys(selected1).length && !!Object.keys(selected2).length) {
+                            dijkstraBtn.removeAttribute('disabled');
+                        } else {
+                            dijkstraBtn.setAttribute('disabled', 'true');
+                        }
+                    })
+                }
+            }
+            if (data[i][j] === 2) {
+                cell.classList.add('_red');
+            }
         }
     }
     let containerElem = document.querySelector('.percolation-method');
-    containerElem.insertBefore(percolationTable, containerElem.firstChild);
+    containerElem.insertBefore(percolationTable, containerElem.lastChild);
+}
+
+function dijkstra() {
+    fetch(serverUrl + '/dijkstra', {
+        method: "POST",
+        body: JSON.stringify({
+            x1: selected1.x,
+            y1: selected1.y,
+            x2: selected2.x,
+            y2: selected2.y,
+            matrix: currentMatrix
+        })
+    })
+        .then((json) => json.json())
+        .then((data) => {
+            selected1 = {};
+            selected2 = {};
+            generateTable(currentMatrix);
+            if (!data.length) {
+                infoText.innerHTML = "Нет такого пути";
+                return;
+            } else {
+                infoText.innerHTML = "";
+            }
+            let matrixWithHighlights = [];
+            for (let item of currentMatrix) {
+                matrixWithHighlights.push([...item]);
+            }
+            for (let item of data) {
+                matrixWithHighlights[item[0]][item[1]] = 2;
+            }
+            generateTable(matrixWithHighlights);
+        })
 }
 
 function showMessageInsideTable(message) {
@@ -59,6 +139,7 @@ async function main() {
         let message = 'Incorrect data came from the server. Try again';
         showMessageInsideTable(message);
     } else {
+        currentMatrix = data;
         generateTable(data);
     }
 }
@@ -72,6 +153,7 @@ async function onButtonClick() {
         let message = 'Incorrect data came from the server. Try again';
         showMessageInsideTable(message);
     } else {
+        currentMatrix = data;
         generateTable(data);
     }
 }

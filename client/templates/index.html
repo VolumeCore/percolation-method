@@ -10,7 +10,6 @@
 </head>
 <body>
 <div class="percolation-method">
-    <table class="percolation-method__table" id="percolation-table"></table>
     <div class="percolation-method__form-wrapper">
         <div class="percolation-method__form-inputs">
             <label for="size-input">Size</label>
@@ -19,8 +18,12 @@
             <label for="concentration-input">Concentration</label>
             <input type="number" id="concentration-input" class="percolation-method__form-concentration-input">
         </div>
-        <button class="percolation-method__form-generate-btn" onclick="onButtonClick()">Generate</button>
+        <button class="percolation-method__form-generate-btn" id="generate-btn" onclick="onButtonClick()">Generate</button>
+        <button class="percolation-method__form-generate-btn" id="dijkstra-btn" onclick="dijkstra()">Dijkstra</button>
+        <br>
+        <p id="info-text"></p>
     </div>
+    <table class="percolation-method__table" id="percolation-table"></table>
 </div>
 <script type="text/javascript" src="{{ url_for('static', filename='script.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/less" ></script>

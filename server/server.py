@@ -2,7 +2,8 @@ import numpy as np
 from itertools import product
 import os
 import random
-from flask import Flask, render_template
+from flask import Flask, render_template, request, json
+import heapq
 
 project_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 client_dir = os.path.join(project_dir, 'client')
@@ -19,6 +20,18 @@ def hello():
 @app.route("/generateMatrix/<int:size>/<int:concentration>", methods=['GET'])
 def generation_matrix(concentration, size):
     return [[int(random.uniform(0, 1) <= concentration * 0.01) for i in range(size)] for j in range(size)]
+
+@app.route("/dijkstra", methods=['POST'])
+def dijkstra_req():
+    data = json.loads(request.data)
+    start = (data['x1'], data['y1'])
+    end = (data['x2'], data['y2'])
+    matrix = data['matrix']
+    result = dijkstra(matrix, start, end)
+
+    if result is None:
+        return []
+    return result
 
 
 def createCluster(countClusters, i, j):
@@ -107,38 +120,46 @@ def crossTest():
     HK = hoshenKopelman(A)
     print(np.matrix(HK))
 
-def dijkstra(graph, start):
-    distances = [float("inf") for _ in range(len(graph))]
-    visited = [False for _ in range(len(graph))]
-    distances[start] = 0
 
-    while not all(visited):
-        shortest_distance = float("inf")
-        shortest_index = -1
-        for i in range(len(graph)):
-            if distances[i] < shortest_distance and not visited[i]:
-                shortest_distance = distances[i]
-                shortest_index = i
+def dijkstra(matrix, start, end):
+    # преобразуем матрицу в граф
+    graph = {}
+    rows, cols = len(matrix), len(matrix[0])
+    for i in range(rows):
+        for j in range(cols):
+            if matrix[i][j] == 1:
+                neighbors = []
+                if i > 0 and matrix[i - 1][j] == 1:
+                    neighbors.append((i - 1, j))
+                if i < rows - 1 and matrix[i + 1][j] == 1:
+                    neighbors.append((i + 1, j))
+                if j > 0 and matrix[i][j - 1] == 1:
+                    neighbors.append((i, j - 1))
+                if j < cols - 1 and matrix[i][j + 1] == 1:
+                    neighbors.append((i, j + 1))
+                graph[(i, j)] = neighbors
 
-        for i in range(len(graph[shortest_index])):
-            if graph[shortest_index][i] != 0 and distances[i] > distances[shortest_index] + graph[shortest_index][i]:
-                distances[i] = distances[shortest_index] + graph[shortest_index][i]
+    # инициализируем алгоритм Дейкстры
+    queue = [(0, start, [])]
+    visited = set()
 
-        visited[shortest_index] = True
-    print("Lowest distances: " + str(distances))
+    # алгоритм Дейкстры
+    while queue:
+        cost, node, path = heapq.heappop(queue)
+        if node in visited:
+            continue
+        if node == end:
+            return path + [node]
+        visited.add(node)
+        for neighbor in graph[node]:
+            heapq.heappush(queue, (cost + 1, neighbor, path + [node]))
+
+    # если не удалось найти путь до конечной вершины
+    return None
 
 
 if __name__ == "__main__":
-    mat = [
-        [0, 0, 1, 0, 0],
-        [0, 1, 0, 0, 0],
-        [1, 1, 0, 0, 1],
-        [0, 0, 0, 1, 1],
-        [1, 0, 0, 1, 1]
-    ]
-    print('dijkstra:')
-    dijkstra(mat, 0)
-    # app.run(host='0.0.0.0', port=4567)
+    app.run(host='0.0.0.0', port=4567)
 
     # concentration = 45
     # size = 10
