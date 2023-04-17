@@ -2,7 +2,8 @@ import numpy as np
 from itertools import product
 import os
 import random
-from flask import Flask, render_template
+from flask import Flask, render_template, request, json
+import heapq
 
 project_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 client_dir = os.path.join(project_dir, 'client')
@@ -10,13 +11,27 @@ static_dir = os.path.join(client_dir, 'static')
 template_dir = os.path.join(client_dir, 'templates')
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 
+
 @app.route("/")
 def hello():
     return render_template('index.html')
 
+
 @app.route("/generateMatrix/<int:size>/<int:concentration>", methods=['GET'])
 def generation_matrix(concentration, size):
     return [[int(random.uniform(0, 1) <= concentration * 0.01) for i in range(size)] for j in range(size)]
+
+@app.route("/dijkstra", methods=['POST'])
+def dijkstra_req():
+    data = json.loads(request.data)
+    start = (data['x1'], data['y1'])
+    end = (data['x2'], data['y2'])
+    matrix = data['matrix']
+    result = dijkstra(matrix, start, end)
+
+    if result is None:
+        return []
+    return result
 
 
 def createCluster(countClusters, i, j):
@@ -106,18 +121,54 @@ def crossTest():
     print(np.matrix(HK))
 
 
+def dijkstra(matrix, start, end):
+    # преобразуем матрицу в граф
+    graph = {}
+    rows, cols = len(matrix), len(matrix[0])
+    for i in range(rows):
+        for j in range(cols):
+            if matrix[i][j] == 1:
+                neighbors = []
+                if i > 0 and matrix[i - 1][j] == 1:
+                    neighbors.append((i - 1, j))
+                if i < rows - 1 and matrix[i + 1][j] == 1:
+                    neighbors.append((i + 1, j))
+                if j > 0 and matrix[i][j - 1] == 1:
+                    neighbors.append((i, j - 1))
+                if j < cols - 1 and matrix[i][j + 1] == 1:
+                    neighbors.append((i, j + 1))
+                graph[(i, j)] = neighbors
+
+    # инициализируем алгоритм Дейкстры
+    queue = [(0, start, [])]
+    visited = set()
+
+    # алгоритм Дейкстры
+    while queue:
+        cost, node, path = heapq.heappop(queue)
+        if node in visited:
+            continue
+        if node == end:
+            return path + [node]
+        visited.add(node)
+        for neighbor in graph[node]:
+            heapq.heappush(queue, (cost + 1, neighbor, path + [node]))
+
+    # если не удалось найти путь до конечной вершины
+    return None
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=4567)
 
-    concentration = 0.45
-    size = 10
-    clustersVolume = {}
+    # concentration = 45
+    # size = 10
+    # clustersVolume = {}
 
-    clustersVolume.clear()
-    A = generation_matrix(concentration, size)
-    HK = hoshenKopelman(A)
-    print(np.matrix(HK))
+    # clustersVolume.clear()
+    # A = generation_matrix(concentration, size)
+    # HK = hoshenKopelman(A)
+    # print(np.matrix(HK))
 
     # тест на кресте (работает)
-    #crossTest()
-
+    # crossTest()
