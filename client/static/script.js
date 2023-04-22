@@ -81,10 +81,10 @@ function generateTable(data) {
                 })
             }
             if (data[i][j] === 2) { // для алгоритма дейкстры
-                cell.classList.add('_red');
+                cell.classList.add('_darkgray');
             }
             if (data[i][j] === 3) { // для алгоритма дейкстры
-                cell.classList.add('_darkgray');
+                cell.classList.add('_red');
             }
         }
     }
