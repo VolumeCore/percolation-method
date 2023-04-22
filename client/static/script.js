@@ -135,7 +135,7 @@ function showMessageInsideTable(message) {
 }
 
 async function main() {
-    let data = await fetchData(5, 75);
+    let data = await fetchData(15, 75);
     let result = validateData(data);
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
