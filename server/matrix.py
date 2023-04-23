@@ -60,7 +60,7 @@ class Matrix:
                 matrix[2+j*block_size, i*block_size: i*block_size+5], \
                     matrix[i * block_size: i * block_size + 5, j * block_size], \
                     matrix[i * block_size: i * block_size + 5, j * block_size + 4] = 1, 1, 1
-        return matrix
+        return matrix.tolist()
 
 
     def H_shift_matrix(self):
@@ -71,8 +71,8 @@ class Matrix:
                 matrix[2+j*block_size, i*block_size + block_size//2*j: i*block_size+5 + block_size//2*j], \
                     matrix[i * block_size: i * block_size + 5, j * block_size + i*block_size//2], \
                     matrix[i * block_size: i * block_size + 5, j * block_size + 4 + i*block_size//2] = 1, 1, 1
-        return matrix
+        return matrix.tolist()
 
 
 if __name__ == "__main__":
-    print(np.array(Matrix(10, 20).vertical_rain_matrix()))
+    print(np.array(Matrix(10, 20).H_shift_matrix()))

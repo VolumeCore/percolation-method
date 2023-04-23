@@ -1,9 +1,10 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request, json
 from flask_socketio import SocketIO, emit
 from matrix import Matrix
 from hoshenKopelman import HoshenKopelman
+from dijkstra import Dijkstra
 
 project_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 client_dir = os.path.join(project_dir, 'client')
@@ -33,10 +34,68 @@ def generation_matrix(concentration, size):
     return Matrix(concentration, size).generation_matrix()
 
 
+@app.route("/crossMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def cross_matrix(concentration, size):
+    return Matrix(concentration, size).cross_matrix()
+
+
+@app.route("/verticalZebraMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def vertical_zebra_matrix(concentration, size):
+    return Matrix(concentration, size).vertical_zebra_matrix()
+
+
+@app.route("/horizontalZebraMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def horizontal_zebra_matrix(concentration, size):
+    return Matrix(concentration, size).horizontal_zebra_matrix()
+
+
+@app.route("/verticalRainMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def vertical_rain_matrix(concentration, size):
+    return Matrix(concentration, size).vertical_rain_matrix()
+
+
+@app.route("/horizontalRainMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def horizontal_rain_matrix(concentration, size):
+    return Matrix(concentration, size).horizontal_rain_matrix()
+
+
+@app.route("/chessMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def chess_matrix(concentration, size):
+    return Matrix(concentration, size).chess_matrix()
+
+
+@app.route("/circlesMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def circles_matrix(concentration, size):
+    return Matrix(concentration, size).circles_matrix()
+
+
+@app.route("/hMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def H_matrix(concentration, size):
+    return Matrix(concentration, size).H_matrix()
+
+
+@app.route("/hShiftMatrix/<int:size>/<int:concentration>", methods=['GET'])
+def H_shift_matrix(concentration, size):
+    return Matrix(concentration, size).H_shift_matrix()
+
+
 @socketio.on('hoshen_kopelman', namespace='/app')
 def hoshen_kopelman(message):
     print("Start Hoshen Kopelman")
-    HoshenKopelman(int(message['concentration']), int(message['size'])).random_matrix()
+    HoshenKopelman(json.loads(message['matrix'])).method()
+
+
+@socketio.on("dijkstra", namespace='/app')
+def dijkstra(message):
+    start = (message['x1'], message['y1'])
+    end = (message['x2'], message['y2'])
+    matrix = json.loads(message['matrix'])
+    result, cost = Dijkstra(matrix, start, end).method()
+
+    if result is None:
+        emit('dijkstra', {'matrix': []})
+    else:
+        emit('dijkstra', {'matrix': result})
 
 
 if __name__ == "__main__":

@@ -1,5 +1,11 @@
 const serverUrl = 'http://127.0.0.1:4567'
 
+let currentMatrix;
+let selected1 = {};
+let selected2 = {};
+let dijkstraBtn = document.getElementById('dijkstra-btn');
+let infoText = document.getElementById('info-text');
+
 socket = io.connect('http://' + document.domain + ':' + location.port + '/app');
 
 socket.on('hoshen_kopelman', function(data) {
@@ -11,8 +17,29 @@ socket.on('hoshen_kopelman', function(data) {
     }
 });
 
-function fetchData(size, concentration) {
-    return fetch(serverUrl + `/generateMatrix/${size}/${concentration}`)
+socket.on('dijkstra', function(data) {
+    data = data.matrix
+    selected1 = {};
+    selected2 = {};
+    generateTable(currentMatrix);
+    if (!data.length) {
+        infoText.innerHTML = "Нет такого пути";
+        return;
+    } else {
+        infoText.innerHTML = "";
+    }
+    let matrixWithHighlights = [];
+    for (let item of currentMatrix) {
+        matrixWithHighlights.push([...item]);
+    }
+    for (let item of data) {
+        matrixWithHighlights[item[0]][item[1]] = matrixWithHighlights[item[0]][item[1]] === 1 ? 2 : 3;
+    }
+    generateTable(matrixWithHighlights);
+});
+
+function fetchData(type, size, concentration) {
+    return fetch(serverUrl + `/${type}/${size}/${concentration}`)
         .then((res) => res.json())
         .then((data) => {
             return data;
@@ -40,24 +67,70 @@ function isSquareMatrix(matrix) {
     return true;
 }
 
+function generateColor(value) {
+    return '#' + (((value*470892)+148276)%999999)
+}
+
 function generateTable(data) {
+    infoText.innerHTML = "";
     let percolationTable = document.getElementById('percolation-table');
     percolationTable.innerHTML = "";
-    for (let row of data) {
+    dijkstraBtn.setAttribute('disabled', 'true');
+    for (let i = 0; i < data.length; i++) {
         let tableRow = percolationTable.insertRow();
-        for (let col of row) {
+        for (let j = 0; j < data[i].length; j++) {
             let cell = tableRow.insertCell();
-            if(!!col){
-                if(col === 1){
-                    cell.classList.add('_blue')
-                }
-                cell.style.backgroundColor = '#' + (col*9856)
+            if (!!data[i][j]) {
+                cell.classList.add('_blue');
+                cell.style.backgroundColor = generateColor(data[i][j])
             }
+            if (i === 0 || i === data.length - 1) { // всё в фигурных скобках - алгоритм дейкстры
+                console.log(i)
+                cell.classList.add('_clickable');
+                cell.addEventListener('click', () => {
+                    if (cell.classList.contains('_selected')) {
+                        cell.classList.remove('_selected');
+                        if (i === 0) {
+                            selected1 = {};
+                        }
+                        if (i === data.length - 1) {
+                            selected2 = {};
+                        }
+                        dijkstraBtn.setAttribute('disabled', 'true');
+                        return;
+                    }
+                    if (i === 0) {
+                        selected1 = {x: i, y: j};
+                        for (let cell of percolationTable.firstChild.firstChild.childNodes) {
+                            cell.classList.remove('_selected')
+                        }
+                    } else {
+                        selected2 = {x: i, y: j};
+                        for (let cell of percolationTable.firstChild.lastChild.childNodes) {
+                            cell.classList.remove('_selected')
+                        }
+                    }
+                    cell.classList.add('_selected');
 
+                    if (!!Object.keys(selected1).length && !!Object.keys(selected2).length) {
+                        dijkstraBtn.removeAttribute('disabled');
+                    } else {
+                        dijkstraBtn.setAttribute('disabled', 'true');
+                    }
+                })
+            }
+            if (data[i][j] === 2) { // для алгоритма дейкстры
+                cell.classList.add('_darkgray');
+                cell.style.backgroundColor = generateColor(data[i][j])
+            }
+            if (data[i][j] === 3) { // для алгоритма дейкстры
+                cell.classList.add('_red');
+                cell.style.backgroundColor = generateColor(data[i][j])
+            }
         }
     }
     let containerElem = document.querySelector('.percolation-method');
-    containerElem.insertBefore(percolationTable, containerElem.firstChild);
+    containerElem.insertBefore(percolationTable, containerElem.lastChild);
 }
 
 function showMessageInsideTable(message) {
@@ -70,33 +143,43 @@ function showMessageInsideTable(message) {
 }
 
 async function main() {
-    let data = await fetchData(5, 75);
+    let data = await fetchData('generateMatrix',5, 75);
     let result = validateData(data);
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
         showMessageInsideTable(message);
     } else {
+        currentMatrix = data;
         generateTable(data);
     }
 }
 
-async function onButtonClick() {
+async function onButtonClick(type) {
     const size = document.getElementById('size-input').value;
     const concentration = document.getElementById('concentration-input').value;
-    let data = await fetchData(size, concentration);
+    let data = await fetchData(type , size, concentration);
     let result = validateData(data);
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
         showMessageInsideTable(message);
     } else {
+        currentMatrix = data;
         generateTable(data);
     }
 }
 
 async function onButtonHoshenKopelmanClick() {
-    const size = document.getElementById('size-input').value;
-    const concentration = document.getElementById('concentration-input').value;
-    socket.emit('hoshen_kopelman', {concentration: concentration, size: size});
+    socket.emit('hoshen_kopelman', {matrix: JSON.stringify(currentMatrix)});
+}
+
+async function onButtonDijkstraClick(){
+    socket.emit('dijkstra', {
+        matrix: JSON.stringify(currentMatrix),
+        x1: selected1.x,
+        y1: selected1.y,
+        x2: selected2.x,
+        y2: selected2.y
+    });
 }
 
 (() => {
