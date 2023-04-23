@@ -27,7 +27,7 @@ def dijkstra_req():
     start = (data['x1'], data['y1'])
     end = (data['x2'], data['y2'])
     matrix = data['matrix']
-    result = dijkstra(matrix, start, end)
+    result, cost = dijkstra(matrix, start, end)
 
     if result is None:
         return []
@@ -127,35 +127,33 @@ def dijkstra(matrix, start, end):
     rows, cols = len(matrix), len(matrix[0])
     for i in range(rows):
         for j in range(cols):
-            if matrix[i][j] == 1:
-                neighbors = []
-                if i > 0 and matrix[i - 1][j] == 1:
-                    neighbors.append((i - 1, j))
-                if i < rows - 1 and matrix[i + 1][j] == 1:
-                    neighbors.append((i + 1, j))
-                if j > 0 and matrix[i][j - 1] == 1:
-                    neighbors.append((i, j - 1))
-                if j < cols - 1 and matrix[i][j + 1] == 1:
-                    neighbors.append((i, j + 1))
-                graph[(i, j)] = neighbors
+            neighbors = []
+            if i > 0:
+                neighbors.append([(i - 1, j), 1 if matrix[i - 1][j] == 1 else 50000])
+            if i < rows - 1:
+                neighbors.append([(i + 1, j), 1 if matrix[i + 1][j] == 1 else 50000])
+            if j > 0:
+                neighbors.append([(i, j - 1), 1 if matrix[i][j - 1] == 1 else 50000])
+            if j < cols - 1:
+                neighbors.append([(i, j + 1), 1 if matrix[i][j + 1] == 1 else 50000])
+            graph[(i, j)] = neighbors
 
     # инициализируем алгоритм Дейкстры
     queue = [(0, start, [])]
     visited = set()
-
     # алгоритм Дейкстры
     while queue:
         cost, node, path = heapq.heappop(queue)
         if node in visited:
             continue
         if node == end:
-            return path + [node]
+            return path + [node], cost
         visited.add(node)
         for neighbor in graph[node]:
-            heapq.heappush(queue, (cost + 1, neighbor, path + [node]))
+            heapq.heappush(queue, (cost + neighbor[1], neighbor[0], path + [node]))
 
     # если не удалось найти путь до конечной вершины
-    return None
+    return None, None
 
 
 if __name__ == "__main__":

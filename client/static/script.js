@@ -45,43 +45,45 @@ function generateTable(data) {
             let cell = tableRow.insertCell();
             if (!!data[i][j]) {
                 cell.classList.add('_blue');
-
-                if (i === 0 || i === data.length - 1) {
-                    cell.classList.add('_clickable');
-                    cell.addEventListener('click', () => {
-                        if (cell.classList.contains('_selected')) {
-                            cell.classList.remove('_selected');
-                            if (i === 0) {
-                                selected1 = {};
-                            }
-                            if (i === data.length - 1) {
-                                selected2 = {};
-                            }
-                            dijkstraBtn.setAttribute('disabled', 'true');
-                            return;
-                        }
-                        if (i === 0) {
-                            selected1 = {x: i, y: j};
-                            for (let cell of percolationTable.firstChild.firstChild.childNodes) {
-                                cell.classList.remove('_selected')
-                            }
-                        } else {
-                            selected2 = {x: i, y: j};
-                            for (let cell of percolationTable.firstChild.lastChild.childNodes) {
-                                cell.classList.remove('_selected')
-                            }
-                        }
-                        cell.classList.add('_selected');
-
-                        if (!!Object.keys(selected1).length && !!Object.keys(selected2).length) {
-                            dijkstraBtn.removeAttribute('disabled');
-                        } else {
-                            dijkstraBtn.setAttribute('disabled', 'true');
-                        }
-                    })
-                }
             }
-            if (data[i][j] === 2) {
+            if (i === 0 || i === data.length - 1) { // всё в фигурных скобках - алгоритм дейкстры
+                cell.classList.add('_clickable');
+                cell.addEventListener('click', () => {
+                    if (cell.classList.contains('_selected')) {
+                        cell.classList.remove('_selected');
+                        if (i === 0) {
+                            selected1 = {};
+                        }
+                        if (i === data.length - 1) {
+                            selected2 = {};
+                        }
+                        dijkstraBtn.setAttribute('disabled', 'true');
+                        return;
+                    }
+                    if (i === 0) {
+                        selected1 = {x: i, y: j};
+                        for (let cell of percolationTable.firstChild.firstChild.childNodes) {
+                            cell.classList.remove('_selected')
+                        }
+                    } else {
+                        selected2 = {x: i, y: j};
+                        for (let cell of percolationTable.firstChild.lastChild.childNodes) {
+                            cell.classList.remove('_selected')
+                        }
+                    }
+                    cell.classList.add('_selected');
+
+                    if (!!Object.keys(selected1).length && !!Object.keys(selected2).length) {
+                        dijkstraBtn.removeAttribute('disabled');
+                    } else {
+                        dijkstraBtn.setAttribute('disabled', 'true');
+                    }
+                })
+            }
+            if (data[i][j] === 2) { // для алгоритма дейкстры
+                cell.classList.add('_darkgray');
+            }
+            if (data[i][j] === 3) { // для алгоритма дейкстры
                 cell.classList.add('_red');
             }
         }
@@ -117,7 +119,7 @@ function dijkstra() {
                 matrixWithHighlights.push([...item]);
             }
             for (let item of data) {
-                matrixWithHighlights[item[0]][item[1]] = 2;
+                matrixWithHighlights[item[0]][item[1]] = matrixWithHighlights[item[0]][item[1]] === 1 ? 2 : 3;
             }
             generateTable(matrixWithHighlights);
         })
@@ -133,7 +135,7 @@ function showMessageInsideTable(message) {
 }
 
 async function main() {
-    let data = await fetchData(5, 75);
+    let data = await fetchData(15, 75);
     let result = validateData(data);
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
