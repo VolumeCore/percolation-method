@@ -92,37 +92,71 @@ function generateTable(data) {
     containerElem.insertBefore(percolationTable, containerElem.lastChild);
 }
 
-function dijkstra() {
+function dijkstra(x1, y1, x2, y2) {
     fetch(serverUrl + '/dijkstra', {
         method: "POST",
         body: JSON.stringify({
-            x1: selected1.x,
-            y1: selected1.y,
-            x2: selected2.x,
-            y2: selected2.y,
+            x1,
+            y1,
+            x2,
+            y2,
             matrix: currentMatrix
         })
     })
         .then((json) => json.json())
         .then((data) => {
-            selected1 = {};
-            selected2 = {};
-            generateTable(currentMatrix);
-            if (!data.length) {
-                infoText.innerHTML = "Нет такого пути";
-                return;
-            } else {
-                infoText.innerHTML = "";
-            }
-            let matrixWithHighlights = [];
-            for (let item of currentMatrix) {
-                matrixWithHighlights.push([...item]);
-            }
-            for (let item of data) {
-                matrixWithHighlights[item[0]][item[1]] = matrixWithHighlights[item[0]][item[1]] === 1 ? 2 : 3;
-            }
-            generateTable(matrixWithHighlights);
+            generateMatrixWithHighlights(data);
         })
+}
+
+function findShortestWay() {
+    fetch(serverUrl + '/shortest', {
+        method: "POST",
+        body: JSON.stringify({
+            matrix: currentMatrix
+        })
+    })
+        .then((json) => json.json())
+        .then((res) => {
+            generateMatrixWithHighlights(res["path"]);
+        })
+}
+
+function generateMatrixWithHighlights(data) {
+    selected1 = {};
+    selected2 = {};
+    generateTable(currentMatrix);
+    let matrixWithHighlights = [];
+    for (let item of currentMatrix) {
+        matrixWithHighlights.push([...item]);
+    }
+    let redCounter = 0;
+    let blackCounter = 0;
+    let currentRedClusterLength = 0;
+    let redLengths = [];
+
+    for (let i = 0; i < data.length; i++) {
+        if (matrixWithHighlights[data[i][0]][data[i][1]] === 1) {
+            matrixWithHighlights[data[i][0]][data[i][1]] = 2;
+            if (currentRedClusterLength > 0) {
+                redLengths.push(currentRedClusterLength);
+                currentRedClusterLength = 0;
+            }
+            blackCounter++;
+        } else {
+            currentRedClusterLength === 0 && (currentRedClusterLength = 1);
+            if (i > 0 && matrixWithHighlights[data[i - 1][0]][data[i - 1][1]] === 3) {
+                currentRedClusterLength++;
+            }
+            matrixWithHighlights[data[i][0]][data[i][1]] = 3;
+            redCounter++;
+        }
+    }
+    if (currentRedClusterLength > 0) {
+        redLengths.push(currentRedClusterLength);
+    }
+    generateTable(matrixWithHighlights);
+    infoText.innerHTML = `Черных: ${blackCounter}; Красных: ${redCounter}; Средняя длина красного кластера: ${(redLengths.reduce((sum, value) => sum + value, 0) / redLengths.length).toFixed(2)}`
 }
 
 function showMessageInsideTable(message) {

@@ -34,6 +34,21 @@ def dijkstra_req():
     return result
 
 
+@app.route("/shortest", methods=['POST'])
+def shortestWay():
+    data = json.loads(request.data)
+    matrix = data['matrix']
+    minLenght = float('inf')
+    res = []
+    for i in range(len(matrix[0])):
+        for j in range(len(matrix[0])):
+            path, cost = dijkstra(matrix, (0, i), (len(matrix) - 1, j))
+            if cost < minLenght:
+                res = path
+                minLenght = cost
+    
+    return {'path': res, 'cost': minLenght}
+
 def createCluster(countClusters, i, j):
     global clustersVolume
     countClusters += 1
