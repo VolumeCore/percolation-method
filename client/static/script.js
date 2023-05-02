@@ -104,8 +104,8 @@ function dijkstra(x1, y1, x2, y2) {
         })
     })
         .then((json) => json.json())
-        .then((data) => {
-            generateMatrixWithHighlights(data);
+        .then((res) => {
+            generateMatrixWithHighlights(res);
         })
 }
 
@@ -118,11 +118,12 @@ function findShortestWay() {
     })
         .then((json) => json.json())
         .then((res) => {
-            generateMatrixWithHighlights(res["path"]);
+            generateMatrixWithHighlights(res);
         })
 }
 
-function generateMatrixWithHighlights(data) {
+function generateMatrixWithHighlights(res) {
+    let data = res["path"];
     selected1 = {};
     selected2 = {};
     generateTable(currentMatrix);
@@ -156,7 +157,7 @@ function generateMatrixWithHighlights(data) {
         redLengths.push(currentRedClusterLength);
     }
     generateTable(matrixWithHighlights);
-    infoText.innerHTML = `Черных: ${blackCounter}; Красных: ${redCounter}; Средняя длина красного кластера: ${(redLengths.reduce((sum, value) => sum + value, 0) / redLengths.length).toFixed(2)}`
+    infoText.innerHTML = `Черных: ${blackCounter}; Красных: ${redCounter}; Средняя длина красного кластера: ${(redLengths.reduce((sum, value) => sum + value, 0) / redLengths.length).toFixed(2)}; Стоимость пути: ${res["cost"]}`
 }
 
 function showMessageInsideTable(message) {

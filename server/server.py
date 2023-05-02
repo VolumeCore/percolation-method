@@ -30,8 +30,8 @@ def dijkstra_req():
     result, cost = dijkstra(matrix, start, end)
 
     if result is None:
-        return []
-    return result
+        return {'path': [], 'cost': 0}
+    return {'path': result, 'cost': cost}
 
 
 @app.route("/shortest", methods=['POST'])
@@ -144,17 +144,17 @@ def dijkstra(matrix, start, end):
         for j in range(cols):
             neighbors = []
             if i > 0:
-                neighbors.append([(i - 1, j), 1 if matrix[i - 1][j] == 1 else 50000])
+                neighbors.append([(i - 1, j), 1 if matrix[i - 1][j] == 1 else len(matrix) ** 2 + 1])
             if i < rows - 1:
-                neighbors.append([(i + 1, j), 1 if matrix[i + 1][j] == 1 else 50000])
+                neighbors.append([(i + 1, j), 1 if matrix[i + 1][j] == 1 else len(matrix) ** 2 + 1])
             if j > 0:
-                neighbors.append([(i, j - 1), 1 if matrix[i][j - 1] == 1 else 50000])
+                neighbors.append([(i, j - 1), 1 if matrix[i][j - 1] == 1 else len(matrix) ** 2 + 1])
             if j < cols - 1:
-                neighbors.append([(i, j + 1), 1 if matrix[i][j + 1] == 1 else 50000])
+                neighbors.append([(i, j + 1), 1 if matrix[i][j + 1] == 1 else len(matrix) ** 2 + 1])
             graph[(i, j)] = neighbors
 
     # инициализируем алгоритм Дейкстры
-    queue = [(0, start, [])]
+    queue = [(1 if matrix[start[0]][start[1]] == 1 else len(matrix) ** 2 + 1, start, [])]
     visited = set()
     # алгоритм Дейкстры
     while queue:
