@@ -18,8 +18,21 @@
             <label for="concentration-input">Concentration</label>
             <input type="number" id="concentration-input" class="percolation-method__form-concentration-input">
         </div>
-        <button class="percolation-method__form-btn" id="generate-btn" onclick="onButtonClick()">Generate</button>
-        <button class="percolation-method__form-btn" id="dijkstra-btn" onclick="dijkstra(selected1.x, selected1.y, selected2.x, selected2.y)">Dijkstra</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('generateMatrix')">Generate</button>
+
+        <button class="percolation-method__form-btn" onclick="onButtonClick('generateMatrix')">Generate</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('crossMatrix')">Cross Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('verticalZebraMatrix')">Vertical Zebra Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('horizontalZebraMatrix')">Horizontal Zebra Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('verticalRainMatrix')">Vertical Rain Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('horizontalRainMatrix')">Horizontal Rain Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('chessMatrix')">Chess Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('circlesMatrix')">Circles Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('hMatrix')">H Matrix</button>
+        <button class="percolation-method__form-btn" onclick="onButtonClick('hShiftMatrix')">H Shift Matrix</button>
+
+        <button class="percolation-method__form-btn" onclick="onButtonHoshenKopelmanClick()">Generate Hoshen Kopelman</button>
+        <button class="percolation-method__form-btn" id="dijkstra-btn" onclick="onButtonDijkstraClick(selected1.x, selected1.y, selected2.x, selected2.y)">Dijkstra</button>
         <button class="percolation-method__form-btn" id="shortest-btn" onclick="findShortestWay()">Find shortest way</button>
         <button class="percolation-method__form-btn" id="reset-btn" onclick="generateTable(currentMatrix)">Reset</button>
         <br>
@@ -27,6 +40,7 @@
     </div>
     <table class="percolation-method__table" id="percolation-table"></table>
 </div>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='script.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/less" ></script>
 </body>

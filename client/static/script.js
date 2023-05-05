@@ -1,12 +1,45 @@
 const serverUrl = 'http://127.0.0.1:4567'
+
 let currentMatrix;
 let selected1 = {};
 let selected2 = {};
 let dijkstraBtn = document.getElementById('dijkstra-btn');
 let infoText = document.getElementById('info-text');
 
-function fetchData(size, concentration) {
-    return fetch(serverUrl + `/generateMatrix/${size}/${concentration}`)
+socket = io.connect('http://' + document.domain + ':' + location.port + '/app');
+
+socket.on('hoshen_kopelman', function(data) {
+    if (!data) {
+        let message = 'Incorrect data came from the server. Try again';
+        showMessageInsideTable(message);
+    } else {
+        generateTable(data.matrix);
+    }
+});
+
+socket.on('dijkstra', function(data) {
+    data = data.matrix
+    selected1 = {};
+    selected2 = {};
+    generateTable(currentMatrix);
+    if (!data.length) {
+        infoText.innerHTML = "Нет такого пути";
+        return;
+    } else {
+        infoText.innerHTML = "";
+    }
+    let matrixWithHighlights = [];
+    for (let item of currentMatrix) {
+        matrixWithHighlights.push([...item]);
+    }
+    for (let item of data) {
+        matrixWithHighlights[item[0]][item[1]] = matrixWithHighlights[item[0]][item[1]] === 1 ? 2 : 3;
+    }
+    generateTable(matrixWithHighlights);
+});
+
+function fetchData(type, size, concentration) {
+    return fetch(serverUrl + `/${type}/${size}/${concentration}`)
         .then((res) => res.json())
         .then((data) => {
             return data;
@@ -32,6 +65,10 @@ function isSquareMatrix(matrix) {
         }
     }
     return true;
+}
+
+function generateColor(value) {
+    return '#' + (((value*470892)+148276)%999999)
 }
 
 function generateTable(data) {
@@ -92,14 +129,10 @@ function generateTable(data) {
     containerElem.insertBefore(percolationTable, containerElem.lastChild);
 }
 
-function dijkstra(x1, y1, x2, y2) {
-    fetch(serverUrl + '/dijkstra', {
+function findShortestWay() {
+    fetch(serverUrl + '/shortest', {
         method: "POST",
         body: JSON.stringify({
-            x1,
-            y1,
-            x2,
-            y2,
             matrix: currentMatrix
         })
     })
@@ -109,10 +142,14 @@ function dijkstra(x1, y1, x2, y2) {
         })
 }
 
-function findShortestWay() {
-    fetch(serverUrl + '/shortest', {
+function onButtonDijkstraClick(x1, y1, x2, y2) {
+    fetch(serverUrl + '/dijkstra', {
         method: "POST",
         body: JSON.stringify({
+            x1,
+            y1,
+            x2,
+            y2,
             matrix: currentMatrix
         })
     })
@@ -170,7 +207,7 @@ function showMessageInsideTable(message) {
 }
 
 async function main() {
-    let data = await fetchData(15, 75);
+    let data = await fetchData('generateMatrix', 15, 75);
     let result = validateData(data);
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
@@ -181,10 +218,10 @@ async function main() {
     }
 }
 
-async function onButtonClick() {
+async function onButtonClick(type) {
     const size = document.getElementById('size-input').value;
     const concentration = document.getElementById('concentration-input').value;
-    let data = await fetchData(size, concentration);
+    let data = await fetchData(type , size, concentration);
     let result = validateData(data);
     if (!result) {
         let message = 'Incorrect data came from the server. Try again';
@@ -193,6 +230,10 @@ async function onButtonClick() {
         currentMatrix = data;
         generateTable(data);
     }
+}
+
+async function onButtonHoshenKopelmanClick() {
+    socket.emit('hoshen_kopelman', {matrix: JSON.stringify(currentMatrix)});
 }
 
 (() => {
