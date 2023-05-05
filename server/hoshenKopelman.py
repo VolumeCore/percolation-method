@@ -53,7 +53,7 @@ class HoshenKopelman:
                     self.matrix[x][y] = self.matrix[i][j]
 
             # print(self.matrix)
-            emit('hoshen_kopelman', {'matrix': self.matrix})
+            # emit('hoshen_kopelman', {'matrix': self.matrix})
 
         return self.matrix
 
