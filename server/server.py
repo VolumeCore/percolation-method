@@ -19,7 +19,6 @@ def hello():
     return render_template('index.html')
 
 
-
 @socketio.on('connect', namespace='/app')
 def test_connect():
     print('Client Connect')
@@ -38,17 +37,6 @@ def generation_matrix(concentration, size):
 @app.route("/crossMatrix/<int:size>/<int:concentration>", methods=['GET'])
 def cross_matrix(concentration, size):
     return Matrix(concentration, size).cross_matrix()
-@app.route("/dijkstra", methods=['POST'])
-def dijkstra_req():
-    data = json.loads(request.data)
-    start = (data['x1'], data['y1'])
-    end = (data['x2'], data['y2'])
-    matrix = data['matrix']
-    result, cost = dijkstra(matrix, start, end)
-
-    if result is None:
-        return {'path': [], 'cost': 0}
-    return {'path': result, 'cost': cost}
 
 
 @app.route("/shortest", methods=['POST'])
@@ -59,7 +47,7 @@ def shortestWay():
     res = []
     for i in range(len(matrix[0])):
         for j in range(len(matrix[0])):
-            path, cost = dijkstra(matrix, (0, i), (len(matrix) - 1, j))
+            path, cost = Dijkstra(matrix, (0, i), (len(matrix) - 1, j)).method()
             if cost < minLenght:
                 res = path
                 minLenght = cost
@@ -121,45 +109,10 @@ def dijkstra(message):
     result, cost = Dijkstra(matrix, start, end).method()
 
     if result is None:
-        emit('dijkstra', {'matrix': []})
+        emit('dijkstra', {'path': [], 'cost': 0})
     else:
-        emit('dijkstra', {'matrix': result})
-
-
-def dijkstra(matrix, start, end):
-    # преобразуем матрицу в граф
-    graph = {}
-    rows, cols = len(matrix), len(matrix[0])
-    for i in range(rows):
-        for j in range(cols):
-            neighbors = []
-            if i > 0:
-                neighbors.append([(i - 1, j), 1 if matrix[i - 1][j] == 1 else len(matrix) ** 2 + 1])
-            if i < rows - 1:
-                neighbors.append([(i + 1, j), 1 if matrix[i + 1][j] == 1 else len(matrix) ** 2 + 1])
-            if j > 0:
-                neighbors.append([(i, j - 1), 1 if matrix[i][j - 1] == 1 else len(matrix) ** 2 + 1])
-            if j < cols - 1:
-                neighbors.append([(i, j + 1), 1 if matrix[i][j + 1] == 1 else len(matrix) ** 2 + 1])
-            graph[(i, j)] = neighbors
-
-    # инициализируем алгоритм Дейкстры
-    queue = [(1 if matrix[start[0]][start[1]] == 1 else len(matrix) ** 2 + 1, start, [])]
-    visited = set()
-    # алгоритм Дейкстры
-    while queue:
-        cost, node, path = heapq.heappop(queue)
-        if node in visited:
-            continue
-        if node == end:
-            return path + [node], cost
-        visited.add(node)
-        for neighbor in graph[node]:
-            heapq.heappush(queue, (cost + neighbor[1], neighbor[0], path + [node]))
-
-    # если не удалось найти путь до конечной вершины
-    return None, None
+        emit('dijkstra', {'path': result, 'cost': cost})
 
 
 if __name__ == "__main__":
-    socketio.run(app, host='0.0.0.0', port=4567)
+    socketio.run(app, host='0.0.0.0', port=4567, allow_unsafe_werkzeug=True)

@@ -16,17 +16,17 @@ class Dijkstra:
             for j in range(cols):
                 neighbors = []
                 if i > 0:
-                    neighbors.append([(i - 1, j), 1 if self.matrix[i - 1][j] == 1 else 50000])
+                    neighbors.append([(i - 1, j), 1 if self.matrix[i - 1][j] == 1 else len(self.matrix) ** 2 + 1])
                 if i < rows - 1:
-                    neighbors.append([(i + 1, j), 1 if self.matrix[i + 1][j] == 1 else 50000])
+                    neighbors.append([(i + 1, j), 1 if self.matrix[i + 1][j] == 1 else len(self.matrix) ** 2 + 1])
                 if j > 0:
-                    neighbors.append([(i, j - 1), 1 if self.matrix[i][j - 1] == 1 else 50000])
+                    neighbors.append([(i, j - 1), 1 if self.matrix[i][j - 1] == 1 else len(self.matrix) ** 2 + 1])
                 if j < cols - 1:
-                    neighbors.append([(i, j + 1), 1 if self.matrix[i][j + 1] == 1 else 50000])
+                    neighbors.append([(i, j + 1), 1 if self.matrix[i][j + 1] == 1 else len(self.matrix) ** 2 + 1])
                 graph[(i, j)] = neighbors
 
         # инициализируем алгоритм Дейкстры
-        queue = [(0, self.start, [])]
+        queue = [(1 if self.matrix[self.start[0]][self.start[1]] == 1 else len(self.matrix) ** 2 + 1, self.start, [])]
         visited = set()
         # алгоритм Дейкстры
         while queue:
