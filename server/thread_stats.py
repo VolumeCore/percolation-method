@@ -1,3 +1,6 @@
+import threading
+from multiprocessing.pool import ThreadPool
+from threading import Thread
 from time import time
 import numpy as np
 import pandas as pd
@@ -12,15 +15,16 @@ N = 100
 def full_statistics_for_N():
     full_stat = {}
     start_time = time()
-    with mp.Pool(16) as p:
-        answer = p.map(statistics_for_p, list(np.arange(0.05, 1.005, 0.05)))
+
+    with mp.Pool(24) as p:
+        answer = p.map(statistics_for_p, list(np.arange(5, 105, 5)))
         for i in range(1, 20):
             ind = round(i * 0.05, 2)
             full_stat[ind] = answer[i]
 
     # for i in range(1, 20):
     #     p = round(i * 0.05, 2)
-    #     df = statistics_for_p(p)
+    #     df = statistics_for_p(i*5)
     #     full_stat[p] = df
 
     df_full_stat = pd.DataFrame(full_stat)
@@ -30,18 +34,17 @@ def full_statistics_for_N():
 
 def statistics_for_p(p):
     stat = {}
-    for j in range(100):
+    for j in range(10000):
+        print(N, ": ", p, ": ", j)
         stat[j] = count_clusters(p)
     return stat
 
 
 def count_clusters(p):
-    flatten_HK = list(chain.from_iterable(HoshenKopelman(Matrix(p, N).generation_matrix()).method()))
-    unique_numbers = list(set(flatten_HK))
-    unique_numbers.pop(0)
-    count_cl = len(unique_numbers)
-    return count_cl
+    unique_numbers = np.unique(HoshenKopelman(Matrix(p, N).generation_matrix()).method())
+    return len(unique_numbers)-1 if len(unique_numbers) > 1 else len(unique_numbers)
 
 
 if __name__ == '__main__':
     full_statistics_for_N()
+

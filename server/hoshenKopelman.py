@@ -59,4 +59,4 @@ class HoshenKopelman:
 
 
 if __name__ == "__main__":
-    print(np.matrix(HoshenKopelman(Matrix(80, 30).generation_matrix()).method()))
+    print(np.matrix(HoshenKopelman(Matrix(95, 10).generation_matrix()).method()))

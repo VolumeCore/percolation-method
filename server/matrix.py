@@ -1,6 +1,6 @@
 import math
-import random
 
+from Cryptodome.Random import random
 import numpy as np
 
 
@@ -11,7 +11,7 @@ class Matrix:
         self.size = size
 
     def generation_matrix(self):
-        return [[int(random.uniform(0, 1) <= self.concentration * 0.01) for _ in range(self.size)] for _ in
+        return [[int(random.randint(0, 100) <= self.concentration) for _ in range(self.size)] for _ in
                 range(self.size)]
 
     def cross_matrix(self):
@@ -37,10 +37,10 @@ class Matrix:
         return [[(1 if j % 2 == 0 else 0) for _ in range(self.size)] for j in range(self.size)]
 
     def vertical_rain_matrix(self):
-        return [[(random.randint(0, 1) if i % 2 == 0 else 0) for i in range(self.size)] for _ in range(self.size)]
+        return [[(random.getrandbits(1) if i % 2 == 0 else 0) for i in range(self.size)] for _ in range(self.size)]
 
     def horizontal_rain_matrix(self):
-        return [[(random.randint(0, 1) if j % 2 == 0 else 0) for _ in range(self.size)] for j in range(self.size)]
+        return [[(random.getrandbits(1) if j % 2 == 0 else 0) for _ in range(self.size)] for j in range(self.size)]
 
     def chess_matrix(self):
         return [[((0 if j % 2 == 0 else 1) if i % 2 == 0 else (1 if j % 2 == 0 else 0)) for i in range(self.size)] for j
@@ -75,4 +75,4 @@ class Matrix:
 
 
 if __name__ == "__main__":
-    print(np.array(Matrix(10, 20).H_shift_matrix()))
+    print(np.array(Matrix(95, 20).generation_matrix()))
