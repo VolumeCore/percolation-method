@@ -18,24 +18,7 @@ socket.on('hoshen_kopelman', function(data) {
 });
 
 socket.on('dijkstra', function(data) {
-    data = data.matrix
-    selected1 = {};
-    selected2 = {};
-    generateTable(currentMatrix);
-    if (!data.length) {
-        infoText.innerHTML = "Нет такого пути";
-        return;
-    } else {
-        infoText.innerHTML = "";
-    }
-    let matrixWithHighlights = [];
-    for (let item of currentMatrix) {
-        matrixWithHighlights.push([...item]);
-    }
-    for (let item of data) {
-        matrixWithHighlights[item[0]][item[1]] = matrixWithHighlights[item[0]][item[1]] === 1 ? 2 : 3;
-    }
-    generateTable(matrixWithHighlights);
+    generateMatrixWithHighlights(data);
 });
 
 function fetchData(type, size, concentration) {
@@ -144,20 +127,13 @@ function findShortestWay() {
 }
 
 function onButtonDijkstraClick(x1, y1, x2, y2) {
-    fetch(serverUrl + '/dijkstra', {
-        method: "POST",
-        body: JSON.stringify({
-            x1,
-            y1,
-            x2,
-            y2,
-            matrix: currentMatrix
-        })
-    })
-        .then((json) => json.json())
-        .then((res) => {
-            generateMatrixWithHighlights(res);
-        })
+    socket.emit('dijkstra', {
+        x1,
+        y1,
+        x2,
+        y2,
+        matrix: JSON.stringify(currentMatrix)
+    });
 }
 
 function generateMatrixWithHighlights(res) {
