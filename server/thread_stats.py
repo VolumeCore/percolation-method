@@ -1,10 +1,7 @@
-import threading
-from multiprocessing.pool import ThreadPool
 from threading import Thread
 from time import time
 import numpy as np
 import pandas as pd
-from itertools import chain
 from hoshenKopelman import HoshenKopelman
 from matrix import Matrix
 import multiprocessing as mp
@@ -16,28 +13,37 @@ def full_statistics_for_N():
     full_stat = {}
     start_time = time()
 
-    with mp.Pool(24) as p:
-        answer = p.map(statistics_for_p, list(np.arange(5, 105, 5)))
-        for i in range(1, 20):
-            ind = round(i * 0.05, 2)
-            full_stat[ind] = answer[i]
+    for z in range(10):
+        with mp.Pool(24) as p:
+            answer = np.array(p.map(statistics, list(np.arange(1000)))).T
+
+            for i in range(len(answer)):
+                ind = round((i+1) * 0.05, 2)
+                full_stat[ind] = answer[i]
+
+    # with mp.Pool(24) as p:
+    #     answer = p.map(statistics_for_p, list(np.arange(5, 100, 5)))
+    #     print(len(answer))
+    #     for i in range(len(answer)):
+    #         ind = round((i+1) * 0.05, 2)
+    #         full_stat[ind] = answer[i]
 
     # for i in range(1, 20):
     #     p = round(i * 0.05, 2)
     #     df = statistics_for_p(i*5)
     #     full_stat[p] = df
 
-    df_full_stat = pd.DataFrame(full_stat)
-    df_full_stat.to_excel(f'./percolation_{N}.xlsx')
-    print('\nSequential execution time : %3.2f s.' % (time() - start_time))
+        df_full_stat = pd.DataFrame(full_stat)
+        df_full_stat.to_excel(f'./percolation_{N}_{z}.xlsx')
+        print('\nSequential execution time : %3.2f s.' % (time() - start_time))
 
 
-def statistics_for_p(p):
+def statistics(i):
     stat = {}
-    for j in range(10000):
-        print(N, ": ", p, ": ", j)
-        stat[j] = count_clusters(p)
-    return stat
+    for p in range(5, 100, 5):
+        stat[p] = count_clusters(p)
+    print("Success ", i)
+    return list(stat.values())
 
 
 def count_clusters(p):

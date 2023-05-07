@@ -98,7 +98,7 @@ def H_shift_matrix(concentration, size):
 @socketio.on('hoshen_kopelman', namespace='/app')
 def hoshen_kopelman(message):
     print("Start Hoshen Kopelman")
-    HoshenKopelman(json.loads(message['matrix'])).method()
+    emit('hoshen_kopelman', {'matrix': HoshenKopelman(json.loads(message['matrix'])).method()})
 
 
 @socketio.on("dijkstra", namespace='/app')

@@ -82,6 +82,7 @@ function generateTable(data) {
             let cell = tableRow.insertCell();
             if (!!data[i][j]) {
                 cell.classList.add('_blue');
+                cell.style.backgroundColor = generateColor(data[i][j])
             }
             if (i === 0 || i === data.length - 1) { // всё в фигурных скобках - алгоритм дейкстры
                 cell.classList.add('_clickable');
