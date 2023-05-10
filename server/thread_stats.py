@@ -6,27 +6,20 @@ from hoshenKopelman import HoshenKopelman
 from matrix import Matrix
 import multiprocessing as mp
 
-N = 100
+N = 150
 
 
 def full_statistics_for_N():
     full_stat = {}
-    start_time = time()
 
-    for z in range(10):
+    for z in range(8, 10):
+        start_time = time()
         with mp.Pool(24) as p:
             answer = np.array(p.map(statistics, list(np.arange(1000)))).T
 
             for i in range(len(answer)):
                 ind = round((i+1) * 0.05, 2)
                 full_stat[ind] = answer[i]
-
-    # with mp.Pool(24) as p:
-    #     answer = p.map(statistics_for_p, list(np.arange(5, 100, 5)))
-    #     print(len(answer))
-    #     for i in range(len(answer)):
-    #         ind = round((i+1) * 0.05, 2)
-    #         full_stat[ind] = answer[i]
 
     # for i in range(1, 20):
     #     p = round(i * 0.05, 2)
