@@ -5,7 +5,7 @@ import pandas as pd
 import multiprocessing as mp
 from dijkstra import Dijkstra
 
-N = 50
+N = 150
 
 
 def find_shotest(matrix):
